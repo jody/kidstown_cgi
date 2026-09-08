@@ -12,14 +12,22 @@ const places = [
   ['Museum', '8000', 'navbtn_museum.gif']
 ];
 
-function routeTo(key, params = {}) {
+const wordFunLevels = {
+  easy: 'data/school/e_data1.txt',
+  medium: 'data/school/e_data2.txt',
+  difficult: 'data/school/e_data3.txt'
+};
+
+function routeTo(key, params = {}, replace = false) {
   const url = new URL(window.location.href);
   url.search = '';
   url.searchParams.set('KEY', key);
   for (const [name, value] of Object.entries(params)) {
-    url.searchParams.set(name, value);
+    if (value !== '' && value !== null && value !== undefined) {
+      url.searchParams.set(name, value);
+    }
   }
-  history.pushState({}, '', url);
+  history[replace ? 'replaceState' : 'pushState']({}, '', url);
   render();
 }
 
@@ -110,6 +118,152 @@ async function cityParkPage(params) {
     </section>`;
 }
 
+function schoolHome() {
+  return `
+    <section class="legacy-page school-page">
+      <h1>KidsTown School</h1>
+      <img class="chalkboard" src="graphics/school/chalkboard.gif" alt="Chalkboard">
+      <div class="school-intro">
+        <p>Welcome to school!</p>
+        <p>Current activities are:</p>
+        <ul>
+          <li>${link('4001', 'Word Fun')}</li>
+          <li>${link('4002', 'Scramble')}</li>
+          <li>${link('4500', 'Farm Field-Trip')}</li>
+        </ul>
+      </div>
+      <p class="other-locations"><b>Or visit one of these other KidsTown locations</b></p>
+      ${nav()}
+    </section>`;
+}
+
+function wordFunIntro() {
+  return `
+    <section class="legacy-page wordfun-page">
+      <div class="wordfun-wrap">
+        <h1>Welcome to the Word Fun Activity</h1>
+        <hr>
+        <h2>Please choose a level of difficulty by selecting a level below.<br>Click on the "Start Game" button to begin playing.</h2>
+        <div class="wordfun-body">
+          <img src="graphics/school/blocks-left.gif" alt="" class="blocks">
+          <form id="wordfun-start" class="wordfun-levels">
+            <table>
+              <thead><tr><th>Level</th><th>Example Words</th></tr></thead>
+              <tbody>
+                <tr><td><label><input type="radio" name="level" value="easy" checked> <b>Easy</b></label></td><td><b>- fish, ball, and bed</b></td></tr>
+                <tr><td><label><input type="radio" name="level" value="medium"> <b>Medium</b></label></td><td><b>- basketball, flying, and staple</b></td></tr>
+                <tr><td><label><input type="radio" name="level" value="difficult"> <b>Difficult</b></label></td><td><b>- stethoscope and application</b></td></tr>
+              </tbody>
+            </table>
+            <button type="submit">Start Game</button>
+          </form>
+          <img src="graphics/school/blocks-right.gif" alt="" class="blocks">
+        </div>
+      </div>
+      ${nav('4004')}
+    </section>`;
+}
+
+async function loadWordFunRecords(level) {
+  const filename = wordFunLevels[level];
+  if (!filename) throw new Error('Unknown Word Fun difficulty level.');
+  const response = await fetch(filename);
+  if (!response.ok) throw new Error(`Unable to load Word Fun data for ${level}.`);
+  return parseRecordFile(await response.text());
+}
+
+function parseRecordFile(text) {
+  const records = [];
+  let current = null;
+  for (const rawLine of text.split(/\r?\n/)) {
+    const line = rawLine.trimEnd();
+    if (line === '.') {
+      if (current && current.WORD) records.push(current);
+      current = {};
+      continue;
+    }
+    if (!current || !line || line.startsWith('#')) continue;
+    const tab = line.indexOf('\t');
+    if (tab < 0) continue;
+    current[line.slice(0, tab)] = line.slice(tab + 1);
+  }
+  if (current && current.WORD) records.push(current);
+  return records;
+}
+
+async function wordFunGame(params) {
+  const level = params.get('level');
+  if (!level) return wordFunIntro();
+
+  const records = await loadWordFunRecords(level);
+  if (!records.length) throw new Error('The selected Word Fun data file contains no records.');
+
+  let index = Number(params.get('index'));
+  if (!Number.isInteger(index) || index < 0 || index >= records.length) {
+    index = Math.floor(Math.random() * records.length);
+    routeTo('4001', { level, index, guessed: params.get('guessed') || '' }, true);
+    return '';
+  }
+
+  const record = records[index];
+  const word = record.WORD.toUpperCase();
+  const guessed = (params.get('guessed') || '').toUpperCase().replace(/[^A-Z]/g, '');
+  const guessedSet = new Set(guessed);
+  const current = [...word].map(letter => guessedSet.has(letter) ? letter : '_').join(' ');
+  const solved = [...word].every(letter => guessedSet.has(letter));
+
+  if (solved) {
+    return `
+      <section class="legacy-page wordfun-page">
+        <div class="wordfun-wrap">
+          <h1>Word Fun</h1>
+          <div class="wordfun-result">
+            <h3>That's correct! The word is <i>${escapeHtml(word)}.</i><br>Good job, you got it in ${guessed.length} tries!</h3>
+            <img src="graphics/school/${escapeHtml(record.GRAPHIC || '')}" alt="">
+            <h3>${highlightWord(record.SENTENCE || '', record.WORD)}</h3>
+            <div class="wordfun-actions">
+              <button type="button" data-wordfun-action="again" data-level="${level}">Play Again</button>
+              <button type="button" data-wordfun-action="level">Change Level</button>
+            </div>
+          </div>
+        </div>
+        ${nav('4004')}
+      </section>`;
+  }
+
+  const letters = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'].map(letter => {
+    const used = guessedSet.has(letter);
+    return `<button type="button" data-word-letter="${letter}" ${used ? 'disabled' : ''}>${used ? '-' : letter}</button>`;
+  }).join('');
+
+  return `
+    <section class="legacy-page wordfun-page">
+      <div class="wordfun-wrap">
+        <h1>Word Fun</h1>
+        <h2>Select a letter from below</h2>
+        <div class="wordfun-body game">
+          <img src="graphics/school/blocks-left.gif" alt="" class="blocks">
+          <div class="wordfun-game">
+            <div class="word-state">${current}</div>
+            <div class="letter-grid">${letters}</div>
+          </div>
+          <img src="graphics/school/blocks-right.gif" alt="" class="blocks">
+        </div>
+      </div>
+      ${nav('4004')}
+    </section>`;
+}
+
+function highlightWord(sentence, word) {
+  const safeSentence = escapeHtml(sentence);
+  const safeWord = escapeRegex(escapeHtml(word));
+  return safeSentence.replace(new RegExp(safeWord, 'gi'), match => `<span class="highlight-word">${match}</span>`);
+}
+
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function rewriteLegacyLinks(html) {
   return html.replace(/href="\?KEY=(\d+)([^\"]*)"/gi, (_m, key, rest) => {
     return `href="?KEY=${key}${rest}" data-key="${key}"`;
@@ -117,7 +271,7 @@ function rewriteLegacyLinks(html) {
 }
 
 function escapeHtml(value) {
-  return value.replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  return String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 }
 
 function notYet(key) {
@@ -132,6 +286,8 @@ async function render() {
     if (key === '1000') app.innerHTML = home();
     else if (key === '2000') app.innerHTML = cityParkStart();
     else if (key === '2010') app.innerHTML = await cityParkPage(params);
+    else if (key === '4000') app.innerHTML = schoolHome();
+    else if (key === '4001') app.innerHTML = await wordFunGame(params);
     else app.innerHTML = notYet(key);
   } catch (error) {
     app.innerHTML = `<section class="legacy-page"><h1>KidsTown</h1><p>${escapeHtml(error.message)}</p>${nav()}</section>`;
@@ -139,6 +295,28 @@ async function render() {
 }
 
 document.addEventListener('click', event => {
+  const letterButton = event.target.closest('[data-word-letter]');
+  if (letterButton) {
+    const params = new URLSearchParams(location.search);
+    const guessed = (params.get('guessed') || '') + letterButton.dataset.wordLetter;
+    routeTo('4001', {
+      level: params.get('level'),
+      index: params.get('index'),
+      guessed
+    });
+    return;
+  }
+
+  const actionButton = event.target.closest('[data-wordfun-action]');
+  if (actionButton) {
+    if (actionButton.dataset.wordfunAction === 'again') {
+      routeTo('4001', { level: actionButton.dataset.level });
+    } else {
+      routeTo('4001');
+    }
+    return;
+  }
+
   const target = event.target.closest('a[data-key], area[data-key]');
   if (!target) return;
   event.preventDefault();
@@ -148,10 +326,18 @@ document.addEventListener('click', event => {
 });
 
 document.addEventListener('submit', event => {
-  if (event.target.id !== 'park-start') return;
-  event.preventDefault();
-  const form = new FormData(event.target);
-  routeTo('2010', { name: form.get('name') || '', page: '1', from: '0' });
+  if (event.target.id === 'park-start') {
+    event.preventDefault();
+    const form = new FormData(event.target);
+    routeTo('2010', { name: form.get('name') || '', page: '1', from: '0' });
+    return;
+  }
+
+  if (event.target.id === 'wordfun-start') {
+    event.preventDefault();
+    const form = new FormData(event.target);
+    routeTo('4001', { level: form.get('level') || 'easy' });
+  }
 });
 
 window.addEventListener('popstate', render);
