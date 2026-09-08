@@ -106,6 +106,128 @@ footer {
   font: inherit;
 }
 
+.school-page {
+  background: #B0B0FF;
+}
+
+.school-page h1 {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
+.chalkboard {
+  max-width: min(100%, 480px);
+}
+
+.school-intro {
+  width: min(600px, calc(100% - 24px));
+  margin: 18px auto;
+  text-align: left;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.25rem;
+}
+
+.school-intro > p {
+  text-align: center;
+  font-weight: bold;
+}
+
+.school-intro li {
+  margin: 8px 0;
+}
+
+.other-locations {
+  font-size: 1.1rem;
+}
+
+.wordfun-page {
+  background: white;
+}
+
+.wordfun-wrap {
+  width: min(600px, calc(100% - 24px));
+  margin: 0 auto;
+}
+
+.wordfun-wrap h1,
+.wordfun-wrap h2,
+.wordfun-wrap h3 {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.wordfun-body {
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr) 100px;
+  align-items: center;
+  gap: 10px;
+}
+
+.wordfun-body.game {
+  margin-top: 20px;
+}
+
+.blocks {
+  max-width: 100%;
+}
+
+.wordfun-levels table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.wordfun-levels th,
+.wordfun-levels td {
+  padding: 6px;
+  vertical-align: top;
+}
+
+.wordfun-levels th {
+  text-align: center;
+}
+
+.wordfun-levels button,
+.wordfun-actions button {
+  margin-top: 18px;
+  font-size: 1.1rem;
+}
+
+.word-state {
+  font-family: monospace;
+  font-size: 2rem;
+  letter-spacing: 0.12em;
+  margin-bottom: 20px;
+}
+
+.letter-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(34px, 1fr));
+  gap: 6px;
+}
+
+.letter-grid button {
+  font-family: monospace;
+  font-size: 1.1rem;
+  padding: 5px 0;
+}
+
+.wordfun-result img {
+  max-width: min(100%, 360px);
+  max-height: 300px;
+}
+
+.wordfun-actions {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.highlight-word {
+  color: blue;
+}
+
 .placeholder p {
   font-size: 1.1rem;
 }
@@ -114,4 +236,16 @@ footer {
   .home-copy,
   .park-copy { font-size: 1.15rem; }
   .nav-item { width: 74px; }
+
+  .wordfun-body {
+    grid-template-columns: 55px minmax(0, 1fr) 55px;
+  }
+
+  .word-state {
+    font-size: 1.45rem;
+  }
+
+  .letter-grid {
+    grid-template-columns: repeat(5, minmax(34px, 1fr));
+  }
 }
