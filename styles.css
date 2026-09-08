@@ -1,0 +1,117 @@
+html, body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: #EEE2B4;
+  color: #000;
+  font-family: "Times New Roman", Times, serif;
+}
+
+a { color: blue; }
+a:visited { color: purple; }
+a:active { color: red; }
+
+.legacy-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 18px 12px 32px;
+  text-align: center;
+}
+
+.home-page header .welcome {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.home-page header .title {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.town-map {
+  margin: 18px auto 12px;
+  width: 310px;
+}
+
+.home-copy {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1.35;
+}
+
+.home-copy .lead { margin-bottom: 4px; }
+.home-copy .journey { color: #238E68; }
+.home-copy .detective { color: #38B0DE; }
+.home-copy .games { color: #FF1CAE; }
+.home-copy .animals { color: #B87333; }
+.home-copy .states { color: blue; }
+.home-copy .visit { color: magenta; }
+.home-copy .visit span { font-size: 1.9rem; }
+
+.navbar {
+  margin: 22px auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0;
+  max-width: 980px;
+}
+
+.nav-item {
+  width: 82px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.nav-item img {
+  display: block;
+  margin: 0 auto 2px;
+  max-width: 100%;
+}
+
+footer {
+  width: min(600px, calc(100% - 24px));
+  margin: 24px auto 0;
+  text-align: left;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.park-page {
+  background: #F5F5DC;
+}
+
+.park-page h1 {
+  text-align: center;
+}
+
+.park-copy {
+  max-width: 900px;
+  margin: 20px auto;
+  text-align: left;
+  font-size: 1.5rem;
+  line-height: 1.35;
+}
+
+.park-form {
+  margin: 18px auto;
+}
+
+.park-form input,
+.park-form button {
+  font: inherit;
+}
+
+.placeholder p {
+  font-size: 1.1rem;
+}
+
+@media (max-width: 640px) {
+  .home-copy,
+  .park-copy { font-size: 1.15rem; }
+  .nav-item { width: 74px; }
+}
