@@ -151,7 +151,10 @@ footer {
 
 .wordfun-wrap h1,
 .wordfun-wrap h2,
-.wordfun-wrap h3 {
+.wordfun-wrap h3,
+.scramble-wrap h1,
+.scramble-wrap h2,
+.scramble-wrap h3 {
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -188,7 +191,10 @@ footer {
 }
 
 .wordfun-levels button,
-.wordfun-actions button {
+.wordfun-actions button,
+.scramble-levels button,
+.scramble-actions button,
+.scramble-guess button {
   margin-top: 18px;
   font-size: 1.1rem;
 }
@@ -212,12 +218,15 @@ footer {
   padding: 5px 0;
 }
 
-.wordfun-result img {
+.wordfun-result img,
+.scramble-result img,
+.scramble-picture {
   max-width: min(100%, 360px);
   max-height: 300px;
 }
 
-.wordfun-actions {
+.wordfun-actions,
+.scramble-actions {
   display: flex;
   gap: 18px;
   justify-content: center;
@@ -226,6 +235,55 @@ footer {
 
 .highlight-word {
   color: blue;
+}
+
+.scramble-page {
+  background: #CCFFFF;
+}
+
+.scramble-wrap {
+  width: min(600px, calc(100% - 24px));
+  margin: 0 auto;
+}
+
+.scramble-levels {
+  width: 220px;
+  margin: 24px auto;
+  text-align: left;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.1rem;
+}
+
+.scramble-levels label {
+  display: block;
+  margin: 8px 0;
+}
+
+.scramble-levels button {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.scrambled-word,
+.last-guess,
+.scramble-guess {
+  font-family: monospace;
+  font-size: 1.2rem;
+  margin: 18px auto;
+}
+
+.scramble-guess label {
+  display: block;
+}
+
+.scramble-guess input {
+  font: inherit;
+  text-transform: uppercase;
+}
+
+.scramble-error {
+  margin: 16px 0;
 }
 
 .placeholder p {
