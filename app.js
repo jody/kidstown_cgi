@@ -12,7 +12,7 @@ const places = [
   ['Museum', '8000', 'navbtn_museum.gif']
 ];
 
-const wordFunLevels = {
+const schoolLevels = {
   easy: 'data/school/e_data1.txt',
   medium: 'data/school/e_data2.txt',
   difficult: 'data/school/e_data3.txt'
@@ -164,11 +164,11 @@ function wordFunIntro() {
     </section>`;
 }
 
-async function loadWordFunRecords(level) {
-  const filename = wordFunLevels[level];
-  if (!filename) throw new Error('Unknown Word Fun difficulty level.');
+async function loadSchoolRecords(level) {
+  const filename = schoolLevels[level];
+  if (!filename) throw new Error('Unknown School activity difficulty level.');
   const response = await fetch(filename);
-  if (!response.ok) throw new Error(`Unable to load Word Fun data for ${level}.`);
+  if (!response.ok) throw new Error(`Unable to load School activity data for ${level}.`);
   return parseRecordFile(await response.text());
 }
 
@@ -195,7 +195,7 @@ async function wordFunGame(params) {
   const level = params.get('level');
   if (!level) return wordFunIntro();
 
-  const records = await loadWordFunRecords(level);
+  const records = await loadSchoolRecords(level);
   if (!records.length) throw new Error('The selected Word Fun data file contains no records.');
 
   let index = Number(params.get('index'));
@@ -254,6 +254,94 @@ async function wordFunGame(params) {
     </section>`;
 }
 
+function scrambleIntro() {
+  return `
+    <section class="legacy-page scramble-page">
+      <div class="scramble-wrap">
+        <h1>Welcome to the Word Scramble Game</h1>
+        <h2>Please choose a level of difficulty by selecting a level below.<br>Click on the "Start Game" button to begin playing.</h2>
+        <form id="scramble-start" class="scramble-levels">
+          <label><input type="radio" name="level" value="easy" checked> <b>short words</b></label>
+          <label><input type="radio" name="level" value="medium"> <b>longer words</b></label>
+          <label><input type="radio" name="level" value="difficult"> <b>longest words</b></label>
+          <button type="submit">Start Game</button>
+        </form>
+      </div>
+      ${nav('4003')}
+    </section>`;
+}
+
+function scrambleWord(word) {
+  const letters = [...word];
+  let scrambled = word;
+  while (scrambled === word && letters.length > 1) {
+    const copy = [...letters];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    scrambled = copy.join('');
+  }
+  return scrambled;
+}
+
+async function scrambleGame(params) {
+  const level = params.get('level');
+  if (!level) return scrambleIntro();
+
+  const records = await loadSchoolRecords(level);
+  if (!records.length) throw new Error('The selected Scramble data file contains no records.');
+
+  let index = Number(params.get('index'));
+  let scrambled = params.get('scrambled');
+  if (!Number.isInteger(index) || index < 0 || index >= records.length || !scrambled) {
+    index = Math.floor(Math.random() * records.length);
+    scrambled = scrambleWord(records[index].WORD.toUpperCase());
+    routeTo('4002', { level, index, scrambled, count: '0' }, true);
+    return '';
+  }
+
+  const record = records[index];
+  const word = record.WORD.toUpperCase();
+  const count = Math.max(0, Number(params.get('count') || 0));
+  const lastGuess = (params.get('last') || '').toUpperCase();
+  const error = params.get('error') || '';
+  const solved = lastGuess === word;
+
+  if (solved) {
+    const tryWord = count === 1 ? 'try' : 'tries';
+    return `
+      <section class="legacy-page scramble-page">
+        <div class="scramble-wrap scramble-result">
+          <h3>That's correct! The word is <i>${escapeHtml(word)}</i>.<br>Good job, you got it in ${count} ${tryWord}!</h3>
+          <img src="graphics/school/${escapeHtml(record.GRAPHIC || '')}" alt="">
+          <h2>${highlightWord(record.SENTENCE || '', record.WORD)}</h2>
+          <div class="scramble-actions">
+            <button type="button" data-scramble-action="again" data-level="${level}">Play Again</button>
+            <button type="button" data-scramble-action="level">Change Level</button>
+          </div>
+        </div>
+        ${nav('4003')}
+      </section>`;
+  }
+
+  return `
+    <section class="legacy-page scramble-page">
+      <div class="scramble-wrap">
+        <h2>What is this picture?</h2>
+        <img class="scramble-picture" src="graphics/school/${escapeHtml(record.GRAPHIC || '')}" alt="">
+        ${error ? `<h3 class="scramble-error">${escapeHtml(error)}</h3>` : ''}
+        <div class="scrambled-word">Scrambled Word: ${escapeHtml(scrambled)}</div>
+        <form id="scramble-guess" class="scramble-guess">
+          <label>Enter Guess: <input type="text" name="guess" size="${word.length}" maxlength="${word.length}" autocomplete="off"></label>
+          <button type="submit">continue</button>
+        </form>
+        <div class="last-guess">Your Last Guess: ${escapeHtml(lastGuess || '-'.repeat(word.length))}</div>
+      </div>
+      ${nav('4003')}
+    </section>`;
+}
+
 function highlightWord(sentence, word) {
   const safeSentence = escapeHtml(sentence);
   const safeWord = escapeRegex(escapeHtml(word));
@@ -288,6 +376,7 @@ async function render() {
     else if (key === '2010') app.innerHTML = await cityParkPage(params);
     else if (key === '4000') app.innerHTML = schoolHome();
     else if (key === '4001') app.innerHTML = await wordFunGame(params);
+    else if (key === '4002') app.innerHTML = await scrambleGame(params);
     else app.innerHTML = notYet(key);
   } catch (error) {
     app.innerHTML = `<section class="legacy-page"><h1>KidsTown</h1><p>${escapeHtml(error.message)}</p>${nav()}</section>`;
@@ -307,12 +396,22 @@ document.addEventListener('click', event => {
     return;
   }
 
-  const actionButton = event.target.closest('[data-wordfun-action]');
-  if (actionButton) {
-    if (actionButton.dataset.wordfunAction === 'again') {
-      routeTo('4001', { level: actionButton.dataset.level });
+  const wordFunAction = event.target.closest('[data-wordfun-action]');
+  if (wordFunAction) {
+    if (wordFunAction.dataset.wordfunAction === 'again') {
+      routeTo('4001', { level: wordFunAction.dataset.level });
     } else {
       routeTo('4001');
+    }
+    return;
+  }
+
+  const scrambleAction = event.target.closest('[data-scramble-action]');
+  if (scrambleAction) {
+    if (scrambleAction.dataset.scrambleAction === 'again') {
+      routeTo('4002', { level: scrambleAction.dataset.level });
+    } else {
+      routeTo('4002');
     }
     return;
   }
@@ -337,6 +436,50 @@ document.addEventListener('submit', event => {
     event.preventDefault();
     const form = new FormData(event.target);
     routeTo('4001', { level: form.get('level') || 'easy' });
+    return;
+  }
+
+  if (event.target.id === 'scramble-start') {
+    event.preventDefault();
+    const form = new FormData(event.target);
+    routeTo('4002', { level: form.get('level') || 'easy' });
+    return;
+  }
+
+  if (event.target.id === 'scramble-guess') {
+    event.preventDefault();
+    const form = new FormData(event.target);
+    const params = new URLSearchParams(location.search);
+    const level = params.get('level');
+    const index = params.get('index');
+    const scrambled = params.get('scrambled');
+    const previousCount = Math.max(0, Number(params.get('count') || 0));
+    const guess = String(form.get('guess') || '').trim().toUpperCase();
+    const expectedLength = scrambled ? scrambled.length : 0;
+
+    if (guess.length !== expectedLength) {
+      routeTo('4002', {
+        level, index, scrambled, count: previousCount,
+        last: '-'.repeat(expectedLength),
+        error: `The input should be of length ${expectedLength}.`
+      });
+      return;
+    }
+
+    if (!/^[A-Z]+$/.test(guess)) {
+      routeTo('4002', {
+        level, index, scrambled, count: previousCount,
+        last: '-'.repeat(expectedLength),
+        error: 'Only use letters for input.'
+      });
+      return;
+    }
+
+    routeTo('4002', {
+      level, index, scrambled,
+      count: previousCount + 1,
+      last: guess
+    });
   }
 });
 
