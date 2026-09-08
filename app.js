@@ -276,6 +276,7 @@ function scrambleWord(word) {
   let scrambled = word;
   while (scrambled === word && letters.length > 1) {
     const copy = [...letters];
+    // Fisher-Yates shuffle
     for (let i = copy.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [copy[i], copy[j]] = [copy[j], copy[i]];
@@ -357,7 +358,6 @@ function rewriteLegacyLinks(html) {
     return `href="?KEY=${key}${rest}" data-key="${key}"`;
   });
 }
-
 function escapeHtml(value) {
   return String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 }
