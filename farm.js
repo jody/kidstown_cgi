@@ -74,5 +74,5 @@ export function farmPage(key, link, nav) {
   const cropNav = `<div class="farm-choice"><p>Which crop should we visit next?</p><p>${[['4541','Corn'],['4542','Hay'],['4544','Wheat'],['4545','Pumpkins'],['4546','Apples'],['4547','Oranges'],['4548','Grapes']].map(([k,t]) => link(k,t)).join(' &nbsp; ')}</p></div>`;
   const farmNav = `<div class="farm-nav">${link('4500','Start')}<span>${link('4510','Animals')}<br>${link('4530','Crops')}</span>${link('4560','End')}</div>`;
 
-  return `<section class="legacy-page farm-page"><div class="farm-wrap">${page.title ? `<h1>${page.title}</h1><hr>` : ''}${page.body}${page.section === 'animals' ? animalNav : ''}${page.section === 'crops' ? cropNav : ''}${key !== '4500' && key !== '4530' && key !== '4560' ? farmNav : ''}</div>${nav()}</section>`;
+  return `<section class="legacy-page farm-page"><div class="farm-wrap">${page.title ? `<h1>${page.title}</h1><hr>` : ''}${page.body}${page.section === 'animals' ? animalNav : ''}${page.section === 'crops' ? cropNav : ''}${key !== '4500' && key !== '4530' ? farmNav : ''}</div>${nav()}</section>`;
 }
