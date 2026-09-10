@@ -377,6 +377,10 @@ async function render() {
     else if (key === '4000') app.innerHTML = schoolHome();
     else if (key === '4001') app.innerHTML = await wordFunGame(params);
     else if (key === '4002') app.innerHTML = await scrambleGame(params);
+    else if (key.startsWith('45')) {
+      const { farmPage } = await import('./farm.js');
+      app.innerHTML = farmPage(key, link, nav) || notYet(key);
+    }
     else app.innerHTML = notYet(key);
   } catch (error) {
     app.innerHTML = `<section class="legacy-page"><h1>KidsTown</h1><p>${escapeHtml(error.message)}</p>${nav()}</section>`;
