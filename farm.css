@@ -1,0 +1,73 @@
+.farm-page {
+  background: #99FF99;
+}
+
+.farm-wrap {
+  width: min(600px, calc(100% - 24px));
+  margin: 0 auto;
+  font-size: 1.45rem;
+  line-height: 1.35;
+}
+
+.farm-wrap img {
+  max-width: 100%;
+  height: auto;
+}
+
+.farm-zeek,
+.farm-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+}
+
+.farm-zeek > *,
+.farm-side > * {
+  flex: 1 1 0;
+}
+
+.farm-seasons p:nth-child(odd) {
+  text-align: left;
+  margin-right: 28%;
+}
+
+.farm-seasons p:nth-child(even) {
+  text-align: right;
+  margin-left: 28%;
+}
+
+.farm-choice {
+  margin: 26px 0 18px;
+}
+
+.farm-choice p:first-child {
+  margin-bottom: 6px;
+}
+
+.farm-nav {
+  width: min(360px, 100%);
+  margin: 20px auto;
+  border: 2px solid #000;
+  padding: 8px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .farm-wrap {
+    font-size: 1.15rem;
+  }
+
+  .farm-zeek,
+  .farm-side {
+    flex-direction: column;
+  }
+
+  .farm-seasons p:nth-child(n) {
+    text-align: center;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
